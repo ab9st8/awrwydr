@@ -9,8 +9,8 @@ class Lexer:
         self.__init__() # just for good measure
         self.code = code
         result = self.expr()
-        # if self.cursor != len(code):
-            # result = "\\Error: trailing expressions past a single s-expression"
+        if self.cursor != len(code):
+            raise Exception("trailing expressions past a single s-expression")
         return result
 
     def expr(self):
