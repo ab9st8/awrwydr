@@ -15,7 +15,7 @@
     (cdr (car val))))
 
 (define cons? (λ (val)
-    (not? ((atom? val) (nil? val)))))
+    (not? (or? (atom? val) (nil? val)))))
 
 ;; Defined in the Paper, p.12
 (define ff (λ (val)
