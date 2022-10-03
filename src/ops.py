@@ -23,11 +23,11 @@ def opAtom(vm):
     vm.stack.append(vm.pcval(1))
     return 2
 
-# OP_CALL/0 (1)
-# Calls an internal function based on an atomic symbol identifier.
+# OP_CALL/1
+# Calls an internal function based on an atomic symbol identifier (first positional argument).
 def opCall(vm):
-    vm.fns[vm.stack.pop()](vm)
-    return 1
+    vm.fns[vm.pcval(1)](vm)
+    return 2
 
 # OP_DEFINE/1 (1)
 # Binds a value (stack top) to a symbol (first positional argument).
