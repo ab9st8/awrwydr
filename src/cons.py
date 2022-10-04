@@ -9,8 +9,10 @@ class Cons:
     # With this we can iterate over a cons like a list.
     def __iter__(self):
         yield self.car
-        if self.cdr is not None:
+        if type(self.cdr) is Cons:
             yield from self.cdr
+        elif self.cdr is not None:
+            yield self.cdr
 
     def __reversed__(self):
         return reversed(list(self.__iter__()))
