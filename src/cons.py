@@ -12,6 +12,9 @@ class Cons:
         if self.cdr is not None:
             yield from self.cdr
 
+    def __reversed__(self):
+        return reversed(list(self.__iter__()))
+
     # Append a value to the end of the linked list.
     def append(self, value):
         if self.cdr is None:
