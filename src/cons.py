@@ -19,10 +19,10 @@ class Cons:
 
     # Append a value to the end of the linked list.
     def append(self, value):
-        if self.cdr is None:
-            self.cdr = Cons(value, None)
-        else:
+        if self.cdr is Cons:
             self.cdr.append(value)
+        else:
+            self.cdr = Cons(value, None) # basically we ignore the last cdr of an ill-formed list
 
     # Recursive in true functional fashion!
     def length(self):
