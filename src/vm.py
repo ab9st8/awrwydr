@@ -26,7 +26,7 @@ class VM:
             "car": native.car,
             "cdr": native.cdr,
         }
-        self.defs = {} # definitions added by the user
+        self.defs = {} # definitions added with `define/2`
 
         self.code = None
         self.pc = 0

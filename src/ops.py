@@ -1,7 +1,7 @@
-# This is the module where everything regarded how to execute our stack-based code lies.
-# We begin with definitions of the integer representations of each primitive VM.
-# Those are the ones that interact with it and its stack on a very basic level. These are
-# NOT stdlib functions; those are called with OP_CALL and are defined in "vm.py".
+# This is the module where everything regarding how to execute our stack-based code lies.
+# We begin with definitions of the integer representations of each primitive VM opcode;
+# the ones that interact with it and its stack on a very basic level. These are NOT built-in
+# functions; those are called with OP_CALL and are defined in "native.py".
 #
 # Each "op{Name}" function returns a positive integer which is the number the VM PC should
 # be increased by, i.e. its operator's positional arity + 1.
@@ -23,11 +23,11 @@ def opAtom(vm):
     vm.stack.append(vm.pcval(1))
     return 2
 
-# OP_CALL/0 (1)
-# Calls an internal function based on an atomic symbol identifier.
+# OP_CALL/1
+# Calls an internal function based on an atomic symbol identifier (first positional argument).
 def opCall(vm):
-    vm.fns[vm.stack.pop()](vm)
-    return 1
+    vm.fns[vm.pcval(1)](vm)
+    return 2
 
 # OP_DEFINE/1 (1)
 # Binds a value (stack top) to a symbol (first positional argument).

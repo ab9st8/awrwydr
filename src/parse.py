@@ -101,7 +101,7 @@ class Parser:
                 else:
                     result += self.parse(expr.cdr)
 
-                result += [OP_ATOM, fn, OP_CALL]
+                result += [OP_CALL, fn]
                 return result
             else:
                 raise Exception("unknown function")

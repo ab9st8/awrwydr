@@ -9,11 +9,11 @@ to enter the REPL.
 
 ## Explanation
 ### Function notation
-In mathematics and computer science, we've generally accepted this notation for expressing the value of a function:
+In mathematics and computer science, we've generally accepted the following notation for expressing the value of a function:
 ```
 ·(x, y)
 ```
-In this example, `·` is the function, and `x` and `y` are its arguments.
+In this example, `·` represents the function, and `x` and `y` its arguments.
 
 Moreover, if it so happens that the function has specifically two arguments (i.e. it is *binary*), we will often switch up the syntax to have the function (or in this case an *operator*) stand in the center of the expression, between the arguments:
 ```
@@ -23,7 +23,7 @@ This syntax is the one we use for the most basic mathematical binary operations,
 
 However, there's two other notation conventions that abandon this exception: Polish notation and reverse Polish notation (also called prefix notation and postfix/suffix notation respectively). Regardless of arity (number of arguments), the first one always places the function before the arguments...
 ```
-· x y
+·(x, y)
 ```
 ...and the second one the other way around...
 ```
@@ -55,11 +55,12 @@ At that point you should... simply follow the instruction, really. You can view 
 - `quote/1`, which takes one s-expression as an argument and simply returns it as data. Identifiers are not resolved and are represented using Python strings,
 - `define/2`, which takes one identifier and one s-expression as arguments and makes it so that past that point, every instance of the identifier will be replaced with the (previously evaluated) s-expression.[^3]
 - ~~`lambda/2`, which takes one list of identifiers and one s-expression as arguments and creates a lambda abstraction (anonymous function) using the identifiers from the first argument as its parameters and the s-expression as the function body~~[^4]
-- ~~`cond/n`, which takes an arbitrary number `n` of `(X Y)` pairs, where `X` is an expression that evaluates to a boolean value and `Y` is an s-expression. The interpreter will make its way through the `n` pairs and stop at the first one whose `X` evaluates to `True`, then evaluate `Y`.~~[^4]
+- ~~`cond/n`, which takes an arbitrary number `n` of `(X Y)` pairs as arguments, where `X` is an expression that evaluates to a boolean value and `Y` is an s-expression. The interpreter will make its way through the `n` pairs and stop at the first one whose `X` evaluates to `True`, then evaluate `Y`.~~[^4]
+- ~~`dis/1`, which takes a single s-expression as an argument and, without evaluating it, outputs its disassembled RPN microcode representation.~~[^4]
 
-Use `end` or `(end)` to exit the REPL gracefully.
+Enter `end`, `(end)`, or an empty line to exit the REPL gracefully.
 
-All errors are reported using the Python `raise` keyword --- perhaps when all other important features are implemented I'll look to making a more competent error system.
+All errors are reported within Python's exception system --- perhaps when all other important features are implemented I'll look to making a more competent error system.
 
 ## Questions
 ### What's src/prelude.lisp?
