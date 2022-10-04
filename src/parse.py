@@ -130,6 +130,6 @@ class Parser:
     def quote(self, expr):
         """Quote an expression into RPN-compliant code."""
         if type(expr) is Cons:
-            return self.quote(expr.car) + self.quote(expr.cdr) + [OP_ATOM, 'cons', OP_CALL]
+            return self.quote(expr.car) + self.quote(expr.cdr) + [OP_CALL, 'cons']
         else:
             return [OP_ATOM, expr]
