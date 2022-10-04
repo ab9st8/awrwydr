@@ -47,7 +47,6 @@ class Parser:
             "*": -1,    # multiplies some numbers
             "/": -1,    # divides some numbers
             "eq?": 2,   # whether two expressions are equal
-            "log": 1,   # logs an expression to stdout
             "atom?": 1, # whether an expression is an atom
             "nil?": 1,  # whether an expression is nil
             "cons": 2,  # creates a cons pair
@@ -56,20 +55,27 @@ class Parser:
             "cdr": 1,   # returns the tail of a list expression (PN) / quote (RPN)
         }
 
+        # when 0, everything is executed as expected.
+        # when >0, instead every instruction is disassembled.
+        # OP_UPDIS increments this, OP_DOWNDIS 
+        self.disstate = 0
+
     def parse(self, expr):
         if type(expr) is Cons:
             fn = expr.car
-            # This is our first "special" behavior, the `quote` operator which takes
-            # a single argument, any kind of s-expression, and returns it as data --
-            # this is what `Parser.quote` is for.
+
+            # `(quote EXPR)`
+            # Takes an expression [EXPR] as an argument and returns it as data.
             # Identifiers are rendered as Python strings.
             if fn == 'quote':
                 if expr.length() != 2:
                     raise Exception("quote/1: invalid number of arguments")
                 return self.quote(expr.cdr.car)
 
-            # This is how we define "variables" in the VM so we can call them
-            # later using symbol (identifier) literals.
+            # `(define NAME VALUE)`
+            # Takes an identifier [NAME] and an expression [VALUE] as arguments and
+            # binds [VALUE] to [NAME], so that every instance of [NAME] past that point
+            # is replaced with [VALUE].
             elif fn == 'define':
                 if expr.length() != 3:
                     raise Exception("define/2: invalid number of arguments")
@@ -78,6 +84,15 @@ class Parser:
                     raise Exception("define/2: invalid symbol")
                 value = self.parse(expr.cdr.cdr.car)
                 return value + [OP_DEFINE, name]
+
+            # `(dis EXPR)`
+            # Takes an expression [EXPR] as an argument and, without evaluating it,
+            # prints its disassembled microcode form to stdout.
+            elif fn == 'dis':
+                if expr.length() != 2:
+                    raise Exception("dis/1: invalid number of arguments")
+
+                return [OP_UP_DIS] + self.parse(expr.cdr.car) + [OP_DOWN_DIS]
 
             # Default case, simply a function call.
             elif fn in self.fns:
@@ -92,14 +107,14 @@ class Parser:
                         arity = str(self.fns[fn])
                     raise Exception(f"{fn}/{arity}: invalid number of arguments")
 
-                # This is the aforementioned "reversing"! First we add arguments
-                # to our parse result, and only after that do we add the function
-                # name and call opcode.
+                # This is the highly anticipated "turning of the hourglass"! First we
+                # add parsed arguments to our result, and only after that do we add the
+                # function name and call opcode.
                 if type(expr.cdr) is Cons:
-                    for el in expr.cdr:
+                    for el in reversed(expr.cdr):
                         result += self.parse(el)
-                else:
-                    result += self.parse(expr.cdr)
+                # else:
+                #     result += self.parse(expr.cdr)
 
                 result += [OP_CALL, fn]
                 return result
