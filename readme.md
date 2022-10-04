@@ -54,9 +54,9 @@ Enter an s-expression!
 At that point you should... simply follow the instruction, really. You can view supported in-built functions in both `Vm.__init__` (src/vm.py) and `Parser.__init__` (src/parser.py). Apart from those, there are two additional language constructs, not represented as function calls in the final VM microcode:
 - `quote/1`, which takes one s-expression as an argument and simply returns it as data. Identifiers are not resolved and are represented using Python strings,
 - `define/2`, which takes one identifier and one s-expression as arguments and makes it so that past that point, every instance of the identifier will be replaced with the (previously evaluated) s-expression.[^3]
+- `dis/1`, which takes a single s-expression as an argument and, without evaluating it, outputs its disassembled RPN microcode representation,
 - ~~`lambda/2`, which takes one list of identifiers and one s-expression as arguments and creates a lambda abstraction (anonymous function) using the identifiers from the first argument as its parameters and the s-expression as the function body~~[^4]
 - ~~`cond/n`, which takes an arbitrary number `n` of `(X Y)` pairs as arguments, where `X` is an expression that evaluates to a boolean value and `Y` is an s-expression. The interpreter will make its way through the `n` pairs and stop at the first one whose `X` evaluates to `True`, then evaluate `Y`.~~[^4]
-- ~~`dis/1`, which takes a single s-expression as an argument and, without evaluating it, outputs its disassembled RPN microcode representation.~~[^4]
 
 Enter `end`, `(end)`, or an empty line to exit the REPL gracefully.
 
