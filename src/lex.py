@@ -67,5 +67,8 @@ class Lexer:
             while self.cursor < len(self.code) and (self.curr().isalpha() or self.curr() in ['+', '-', '*', '/', '?']):
                 result += self.curr()
                 self.cursor += 1
+            if result == "true": return True
+            elif result == "false": return False
+            elif result == "nil": return None
             return result
 
