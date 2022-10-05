@@ -22,9 +22,5 @@ while True:
     if code in ["", "end", "(end)"] or code.isspace():
         print("Diolch, hwyl!")
         break
-    res = lexer.lex(code)
-    if type(res) is str and res.startswith("\\"):
-        stderr.write(res + "\n")
-        break
-    res = parser.parse(res)
-    vm.run(res)
+    
+    vm.run(parser.parse(lexer.lex(code)))
