@@ -68,7 +68,7 @@ It serves both as a future[^5] test and a way to import some basic functionality
 ### What does the project's name mean? How do you pronounce it?
 It's pronounced something close to "hour-wedder" in English and it means "hourglass" in Welsh. I chose it to reflect the manner of PN-to-RPN translation used in this parser (reversal, like the turning of an hourglass).
 ### Why choose Python as the implementation language?
-Python trades performance for ease and speed nimbleness of development - in the case of a toy interpreter, I value the latter deeply and don't really care about the prior.
+Python trades performance for ease and speed of development - in the case of a toy interpreter, I value the latter deeply and don't really care about the prior.
 
 [^1]: Welsh for "turning the hourglass \[upside down\]"
 [^2]: short for Polish notation and reverse Polish notation
