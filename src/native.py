@@ -1,4 +1,5 @@
 from functools import reduce
+from copy import copy
 
 from cons import Cons
 
@@ -57,12 +58,13 @@ def div(vm):
 
 def list(vm):
     size = vm.argstarts.pop()
-    args = [None] # for that well-formed list goodness
+    args = []
     while len(vm.stack) != size:
         el = vm.stack.pop()
         args.append(el)
 
-    vm.stack.append(reduce(lambda a, b: Cons(b, a), args))
+    args.reverse() # :/
+    vm.stack.append(reduce(lambda a, b: Cons(b, a), args, None))
 
 def eqq(vm):
     a = vm.stack.pop()
@@ -80,7 +82,7 @@ def nilq(vm):
 def cons(vm):
     a = vm.stack.pop()
     b = vm.stack.pop()
-    vm.stack.append(Cons(b, a))
+    vm.stack.append(Cons(a, b))
 
 def car(vm):
     el = vm.stack.pop()

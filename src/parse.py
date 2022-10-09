@@ -68,7 +68,7 @@ class Parser:
             # Takes an expression [EXPR] as an argument and returns it as data.
             # Identifiers are rendered as Python strings.
             if fn == 'quote':
-                if expr.length() != 2:
+                if len(expr) != 2:
                     raise Exception("quote/1: invalid number of arguments")
                 return self.quote(expr.cdr.car)
 
@@ -77,7 +77,7 @@ class Parser:
             # binds [VALUE] to [NAME], so that every instance of [NAME] past that point
             # is replaced with [VALUE].
             elif fn == 'define':
-                if expr.length() != 3:
+                if len(expr) != 3:
                     raise Exception("define/2: invalid number of arguments")
                 name = expr.cdr.car
                 if not type(name) is str:
@@ -89,7 +89,7 @@ class Parser:
             # Takes an expression [EXPR] as an argument and, without evaluating it,
             # prints its disassembled microcode form to stdout.
             elif fn == 'dis':
-                if expr.length() != 2:
+                if len(expr) != 2:
                     raise Exception("dis/1: invalid number of arguments")
 
                 return [OP_UP_DIS] + self.parse(expr.cdr.car) + [OP_DOWN_DIS]
@@ -100,7 +100,7 @@ class Parser:
                 # if the function is variadic, we need to mark the start of arguments
                 if self.fns[fn] == -1:
                     result = [OP_START_ARGS]
-                elif expr.length() - 1 != self.fns[fn]: # <list length> - <fn name>
+                elif len(expr) - 1 != self.fns[fn]: # <list length> - <fn name>
                     if self.fns[fn] == -1:
                         arity = 'n'
                     else:
