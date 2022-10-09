@@ -17,7 +17,6 @@ class VM:
             "-": native.sub,
             "*": native.mul,
             "/": native.div,
-            "log": native.log,
             "eq?": native.eqq,
             "atom?": native.atomq,
             "nil?": native.nilq,
@@ -30,6 +29,8 @@ class VM:
 
         self.code = None
         self.pc = 0
+        self.optable = OPTABLE
+        self.disstate = 0
 
     def pcval(self, offset=0):
         return self.code[self.pc+offset]
@@ -43,7 +44,7 @@ class VM:
         self.stack = []
         length = len(self.code)
         while self.pc != length:
-            skip = OPTABLE[self.pcval()](self) # cool, huh? no internal opcode branching needed!
+            skip = self.optable[self.pcval()](self) # cool, huh? no internal opcode branching needed!
             self.pc += skip
 
         if self.size() > 0:

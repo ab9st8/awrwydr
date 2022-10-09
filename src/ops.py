@@ -11,6 +11,8 @@ OP_CALL = 1
 OP_DEFINE = 2
 OP_FIND = 3
 OP_START_ARGS = 4
+OP_UP_DIS = 5
+OP_DOWN_DIS = 6
 
 # Documentation syntax:
 #
@@ -50,4 +52,53 @@ def opStartArgs(vm):
     vm.argstarts.append(len(vm.stack))
     return 1
 
-OPTABLE = [opAtom, opCall, opDefine, opFind, opStartArgs]
+# OP_UP_DIS/0
+# Makes the VM start disassembling if starting from 0.
+def opUpDis(vm):
+    vm.disstate += 1
+    vm.optable = DISOPTABLE
+    return 1
+
+OPTABLE = [opAtom, opCall, opDefine, opFind, opStartArgs, opUpDis]
+
+# These are the disassembly versions of each of the VM's opcodes. They will be executed
+# instead of their default counterparts above when up into disassembly mode with `OP_UP_DIS`.
+
+def disAtom(vm):
+    print(f"{vm.pc:03} -- OP_ATOM   {str(vm.pcval(1))}")
+    return 2
+
+def disCall(vm):
+    print(f"{vm.pc:03} -- OP_CALL   {vm.pcval(1)}")
+    return 2
+
+def disDefine(vm):
+    print(f"{vm.pc:03} -- OP_DEFINE {vm.pcval(1)}")
+    return 2
+
+def disFind(vm):
+    print(f"{vm.pc:03} -- OP_FIND   {vm.pcval(1)} ")
+    return 2
+
+def disStartArgs(vm):
+    print(f"{vm.pc:03} -- OP_START_ARGS")
+    return 1
+
+def disUpDis(vm):
+    vm.disstate += 1
+    print(f"{vm.pc:03} -- OP_UP_DIS")
+    return 1
+
+# OP_DOWN_DIS/0
+# Makes the VM end disassembling if reaches 0. This is the only opcode that does not have
+# two optable-dependent variants -- there is no logical way in which we could encounter
+# an `OP_DOWN_DIS` outside of disassembly mode.
+def disDownDis(vm):
+    vm.disstate -= 1
+    if vm.disstate == 0:
+        vm.optable = OPTABLE
+    else:
+        print(f"{vm.pc:03} -- OP_DOWN_DIS")
+    return 1
+
+DISOPTABLE = [disAtom, disCall, disDefine, disFind, disStartArgs, disUpDis, disDownDis]

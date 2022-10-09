@@ -1,4 +1,5 @@
 from functools import reduce
+from copy import copy
 
 from cons import Cons
 
@@ -17,10 +18,10 @@ def add(vm):
     while len(vm.stack) != size:
         el = vm.stack.pop()
         if not type(el) is int:
-            raise Exception("Invalid type for internal function `add`")
+            raise Exception("`+/n`: invalid argument type")
         args.append(el)
 
-    vm.stack.append(reduce(lambda a, b: a+b, args))
+    vm.stack.append(reduce(lambda a, b: a+b, args, 0))
 
 def sub(vm):
     size = vm.argstarts.pop()
@@ -28,10 +29,10 @@ def sub(vm):
     while len(vm.stack) != size:
         el = vm.stack.pop()
         if not type(el) is int:
-            raise Exception("Invalid type for internal function `sub`")
+            raise Exception("`-/n`: invalid argument type")
         args.append(el)
 
-    vm.stack.append(reduce(lambda a, b: a-b, args))
+    vm.stack.append(reduce(lambda a, b: a-b, args, 0))
 
 def mul(vm):
     size = vm.argstarts.pop()
@@ -39,10 +40,10 @@ def mul(vm):
     while len(vm.stack) != size:
         el = vm.stack.pop()
         if not type(el) is int:
-            raise Exception("Invalid type for internal function `mul`")
+            raise Exception("`*/n`: invalid argument type")
         args.append(el)
 
-    vm.stack.append(reduce(lambda a, b: a*b, args))
+    vm.stack.append(reduce(lambda a, b: a*b, args, 1))
 
 def div(vm):
     size = vm.argstarts.pop()
@@ -50,23 +51,20 @@ def div(vm):
     while len(vm.stack) != size:
         el = vm.stack.pop()
         if not type(el) is int:
-            raise Exception("Invalid type for internal function `div`")
+            raise Exception("`//n`: invalid argument type")
         args.append(el)
 
-    vm.stack.append(reduce(lambda a, b: a/b, args))
+    vm.stack.append(reduce(lambda a, b: a/b, args, 1))
 
 def list(vm):
     size = vm.argstarts.pop()
-    args = [None] # for that well-formed list goodness
+    args = []
     while len(vm.stack) != size:
         el = vm.stack.pop()
         args.append(el)
 
-    vm.stack.append(reduce(lambda a, b: Cons(b, a), args))
-
-def log(vm):
-    el = vm.stack.pop()
-    print(el)
+    args.reverse() # :/
+    vm.stack.append(reduce(lambda a, b: Cons(b, a), args, None))
 
 def eqq(vm):
     a = vm.stack.pop()
@@ -84,7 +82,7 @@ def nilq(vm):
 def cons(vm):
     a = vm.stack.pop()
     b = vm.stack.pop()
-    vm.stack.append(Cons(b, a))
+    vm.stack.append(Cons(a, b))
 
 def car(vm):
     el = vm.stack.pop()
