@@ -113,13 +113,14 @@ class Parser:
                 if type(expr.cdr) is Cons:
                     for el in reversed(expr.cdr):
                         result += self.parse(el)
+                # TODO: what about this?
                 # else:
                 #     result += self.parse(expr.cdr)
 
                 result += [OP_CALL, fn]
                 return result
             else:
-                raise Exception("unknown function")
+                raise Exception(f"unknown function `{fn}`")
         else:
             # We solemnly pledge to resolve all identifiers and leave them not
             # in literal form!
@@ -130,6 +131,13 @@ class Parser:
     def quote(self, expr):
         """Quote an expression into RPN-compliant code."""
         if type(expr) is Cons:
-            return self.quote(expr.car) + self.quote(expr.cdr) + [OP_CALL, 'cons']
+            # `(unquote EXPR)`
+            # Usable only in `quote/1`. Weaves the evaluated version of EXPR
+            # into its surrounding quote expression.
+            if expr.car == 'unquote':
+                if len(expr) != 2:
+                    raise Exception("unquote/1: invalid number of arguments")
+                return self.parse(expr.cdr.car)
+            return self.quote(expr.cdr) + self.quote(expr.car) + [OP_CALL, 'cons']
         else:
             return [OP_ATOM, expr]

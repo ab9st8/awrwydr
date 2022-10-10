@@ -53,10 +53,11 @@ Enter an s-expression!
 ```
 At that point you should... simply follow the instruction, really. You can view supported in-built functions in both `Vm.__init__` (src/vm.py) and `Parser.__init__` (src/parser.py). Apart from those, there are two additional language constructs, not represented as function calls in the final VM microcode:
 - `quote/1`, which takes one s-expression as an argument and simply returns it as data. Identifiers are not resolved and are represented using Python strings,
-- `define/2`, which takes one identifier and one s-expression as arguments and makes it so that past that point, every instance of the identifier will be replaced with the (previously evaluated) s-expression.[^3]
+- `unquote/1`, which takes one s-expression as an argument and weaves it (for evaluation) into its surrounding quote experssion (usable only in `quote/1`),[^3]
+- `define/2`, which takes one identifier and one s-expression as arguments and makes it so that past that point, every instance of the identifier will be replaced with the (previously evaluated) s-expression.[^4]
 - `dis/1`, which takes a single s-expression as an argument and, without evaluating it, outputs its disassembled RPN microcode representation,
-- ~~`lambda/2`, which takes one list of identifiers and one s-expression as arguments and creates a lambda abstraction (anonymous function) using the identifiers from the first argument as its parameters and the s-expression as the function body~~[^4]
-- ~~`cond/n`, which takes an arbitrary number `n` of `(X Y)` pairs as arguments, where `X` is an expression that evaluates to a boolean value and `Y` is an s-expression. The interpreter will make its way through the `n` pairs and stop at the first one whose `X` evaluates to `True`, then evaluate `Y`.~~[^4]
+- ~~`lambda/2`, which takes one list of identifiers and one s-expression as arguments and creates a lambda abstraction (anonymous function) using the identifiers from the first argument as its parameters and the s-expression as the function body~~[^5]
+- ~~`cond/n`, which takes an arbitrary number `n` of `(X Y)` pairs as arguments, where `X` is an expression that evaluates to a boolean value and `Y` is an s-expression. The interpreter will make its way through the `n` pairs and stop at the first one whose `X` evaluates to `True`, then evaluate `Y`.~~[^5]
 
 Enter `end`, `(end)`, or an empty line to exit the REPL gracefully.
 
@@ -64,14 +65,15 @@ All errors are reported within Python's exception system --- perhaps when all ot
 
 ## Questions
 ### What's src/prelude.lisp?
-It serves both as a future[^5] test and a way to import some basic functionality that doesn't have to be defined natively.
+It serves both as a future[^6] test and a way to import some basic functionality that doesn't have to be defined natively.
 ### What does the project's name mean? How do you pronounce it?
 It's pronounced something close to "hour-wedder" in English and it means "hourglass" in Welsh. I chose it to reflect the manner of PN-to-RPN translation used in this parser (reversal, like the turning of an hourglass).
 ### Why choose Python as the implementation language?
 Python trades performance for ease and speed of development - in the case of a toy interpreter, I value the latter deeply and don't really care about the prior.
 
 [^1]: Welsh for "turning the hourglass \[upside down\]"
-[^2]: short for Polish notation and reverse Polish notation
-[^3]: All this is just the long way to say `define/2` is used to define variables.
-[^4]: Not yet implemented!
-[^5]: Because not only does the interpreter not know yet how to import files, it doesn't know all the constructs used in the prelude (like `lambda` or `cond`).
+[^2]: Short for Polish notation and reverse Polish notation
+[^3]: Which means `(quote (1 (unquote (+ 1 1)) 3))` is equivalent to `(quote (1 2 3))`.
+[^4]: All this is just the long way to say `define/2` is used to define variables.
+[^5]: Not yet implemented!
+[^6]: Because not only does the interpreter not know yet how to import files, it doesn't know all the constructs used in the prelude (like `lambda` or `cond`).
