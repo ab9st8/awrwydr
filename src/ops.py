@@ -13,6 +13,8 @@ OP_FIND = 3
 OP_START_ARGS = 4
 OP_UP_DIS = 5
 OP_DOWN_DIS = 6
+OP_JUMP = 7
+OP_JIF = 8
 
 # Documentation syntax:
 #
@@ -59,7 +61,18 @@ def opUpDis(vm):
     vm.optable = DISOPTABLE
     return 1
 
-OPTABLE = [opAtom, opCall, opDefine, opFind, opStartArgs, opUpDis]
+# OP_JUMP/1
+# Advances the PC by the value of the first positional argument.
+def opJump(vm):
+    return vm.pcval(1)
+
+# OP_JIF/1 (1)
+# Jumps to the first positional argument if the top of the stack is false.
+def opJif(vm):
+    if not vm.stack.pop():
+        return vm.pcval(1)
+    return 2
+
 
 # These are the disassembly versions of each of the VM's opcodes. They will be executed
 # instead of their default counterparts above when up into disassembly mode with `OP_UP_DIS`.
@@ -89,8 +102,17 @@ def disUpDis(vm):
     print(f"{vm.pc:03} -- OP_UP_DIS")
     return 1
 
+def disJump(vm):
+    print(f"{vm.pc:03} -- OP_JUMP   {vm.pcval(1)}")
+    return 2
+
+
+def disJif(vm):
+    print(f"{vm.pc:03} -- OP_JIF    {vm.pcval(1)}")
+    return 2
+
 # OP_DOWN_DIS/0
-# Makes the VM end disassembling if reaches 0. This is the only opcode that does not have
+# Makes the VM end disassembling if vm.disstate reaches 0. This is the only opcode that does not have
 # two optable-dependent variants -- there is no logical way in which we could encounter
 # an `OP_DOWN_DIS` outside of disassembly mode.
 def disDownDis(vm):
@@ -101,4 +123,5 @@ def disDownDis(vm):
         print(f"{vm.pc:03} -- OP_DOWN_DIS")
     return 1
 
-DISOPTABLE = [disAtom, disCall, disDefine, disFind, disStartArgs, disUpDis, disDownDis]
+OPTABLE = [opAtom, opCall, opDefine, opFind, opStartArgs, opUpDis, disDownDis, opJump, opJif]
+DISOPTABLE = [disAtom, disCall, disDefine, disFind, disStartArgs, disUpDis, disDownDis, disJump, disJif]

@@ -43,7 +43,7 @@ class VM:
         self.pc = 0
         self.stack = []
         length = len(self.code)
-        while self.pc != length:
+        while self.pc < length:
             skip = self.optable[self.pcval()](self) # cool, huh? no internal opcode branching needed!
             self.pc += skip
 

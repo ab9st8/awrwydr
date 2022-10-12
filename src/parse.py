@@ -60,6 +60,9 @@ class Parser:
         # OP_UPDIS increments this, OP_DOWNDIS 
         self.disstate = 0
 
+        self.jumppatches = []
+        # self.jifpatches = []
+
     def parse(self, expr):
         if type(expr) is Cons:
             fn = expr.car
@@ -93,6 +96,33 @@ class Parser:
                     raise Exception("dis/1: invalid number of arguments")
 
                 return [OP_UP_DIS] + self.parse(expr.cdr.car) + [OP_DOWN_DIS]
+
+            # `(cond (COND1 EXPR1) (COND2 EXPR2) ...)`
+            # Takes a list of pairs of expressions as arguments and evaluates them
+            # in order. If [COND] evaluates to true, [EXPR] is evaluated and returned.
+            # If [COND] evaluates to false, the next pair is evaluated.
+            elif fn == 'cond':
+                result = []
+                for pair in expr.cdr.car:
+                    if not type(pair) is Cons or len(pair) != 2:
+                        raise Exception("cond: invalid syntax")
+                    cond = pair.car
+                    expr = pair.cdr.car
+                    
+                    # The boolean condition and jump-if-false
+                    result += self.parse(cond) + [OP_JIF, 0]
+                    jifpatch = len(result) - 1 # save the patch location
+
+                    # The evaluated expression and unconditional jump
+                    result += self.parse(expr) + [OP_JUMP, 0]
+                    self.jumppatches.append(len(result) - 1) # save the patch location
+
+                    # patch JIF
+                    result[jifpatch] = len(result) - jifpatch + 1
+
+                for patch in self.jumppatches:
+                    result[patch] = len(result) - patch + 1
+                return result
 
             # Default case, simply a function call.
             elif fn in self.fns:
