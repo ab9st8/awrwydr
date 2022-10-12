@@ -27,7 +27,7 @@ However, there's two other notation conventions that abandon this exception: Pol
 ```
 ...and the second one the other way around...
 ```
-y x ·
+(y, x)·
 ```
 These two conventions are characteristic to two families of programming languages: Lisps and Forths. Lisps use parentheses to denote function expressions' beginnings and ends, fundamentally making each function expression a list of tokens, hence the name Lisp: list processor...
 ```
@@ -56,8 +56,8 @@ At that point you should... simply follow the instruction, really. You can view 
 - `unquote/1`, which takes one s-expression as an argument and weaves it (for evaluation) into its surrounding quote experssion (usable only in `quote/1`),[^3]
 - `define/2`, which takes one identifier and one s-expression as arguments and makes it so that past that point, every instance of the identifier will be replaced with the (previously evaluated) s-expression.[^4]
 - `dis/1`, which takes a single s-expression as an argument and, without evaluating it, outputs its disassembled RPN microcode representation,
-- ~~`lambda/2`, which takes one list of identifiers and one s-expression as arguments and creates a lambda abstraction (anonymous function) using the identifiers from the first argument as its parameters and the s-expression as the function body~~[^5]
-- ~~`cond/n`, which takes an arbitrary number `n` of `(X Y)` pairs as arguments, where `X` is an expression that evaluates to a boolean value and `Y` is an s-expression. The interpreter will make its way through the `n` pairs and stop at the first one whose `X` evaluates to `True`, then evaluate `Y`.~~[^5]
+- `cond/n`, which takes an arbitrary number `n` of `(COND EXPR)` pairs as arguments, where `COND` is an expression that evaluates to a boolean value and `EXPR` is an expression. The interpreter will make its way through each pairs evaluate the `EXPR` of the first pair whose `COND` evaluates to True,
+- ~~`lambda/2`, which takes one list of identifiers and one s-expression as arguments and creates a lambda abstraction (anonymous function) using the identifiers from the first argument as its parameters and the s-expression as the function body.~~[^5]
 
 Enter `end`, `(end)`, or an empty line to exit the REPL gracefully.
 

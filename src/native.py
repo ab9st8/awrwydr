@@ -77,7 +77,7 @@ def atomq(vm):
 
 def nilq(vm):
     el = vm.stack.pop()
-    vm.stack.append(el == None)
+    vm.stack.append(el is None)
 
 def cons(vm):
     a = vm.stack.pop()
