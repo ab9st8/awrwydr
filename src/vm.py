@@ -1,12 +1,14 @@
-from ops import *
+import ops
 import native
+from lambdaobj import *
+
 
 # Our stack-based VM! It operates on only five opcodes, all defined
 # in ops.py. Other than that it relies on native functions (native.py)
 # for all of its internal behavior.
 
 class VM:
-    def __init__(self):
+    def __init__(self, defs={}):
         self.stack = []
         self.argstarts = []
         # Each (key, value) pair corresponds to
@@ -25,11 +27,11 @@ class VM:
             "car": native.car,
             "cdr": native.cdr,
         }
-        self.defs = {} # definitions added with `define/2`
+        self.defs = defs # definitions added with `define/2` as well as lambda arguments
 
         self.code = None
         self.pc = 0
-        self.optable = OPTABLE
+        self.optable = ops.OPTABLE
         self.disstate = 0
 
     def pcval(self, offset=0):
@@ -37,6 +39,9 @@ class VM:
 
     def size(self):
         return len(self.stack)
+
+    def push(self, val):
+        self.stack.append(val)
 
     def run(self, code):
         self.code = code
@@ -46,6 +51,3 @@ class VM:
         while self.pc < length:
             skip = self.optable[self.pcval()](self) # cool, huh? no internal opcode branching needed!
             self.pc += skip
-
-        if self.size() > 0:
-            print(f":: {self.stack.pop()}\n")

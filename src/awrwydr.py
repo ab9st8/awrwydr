@@ -24,3 +24,5 @@ while True:
         break
     
     vm.run(parser.parse(lexer.lex(code)))
+    if vm.size() > 0:
+        print(f":: {vm.stack.pop()}\n")

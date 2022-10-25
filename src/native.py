@@ -21,7 +21,7 @@ def add(vm):
             raise Exception("`+/n`: invalid argument type")
         args.append(el)
 
-    vm.stack.append(reduce(lambda a, b: a+b, args, 0))
+    vm.push(reduce(lambda a, b: a+b, args))
 
 def sub(vm):
     size = vm.argstarts.pop()
@@ -32,7 +32,7 @@ def sub(vm):
             raise Exception("`-/n`: invalid argument type")
         args.append(el)
 
-    vm.stack.append(reduce(lambda a, b: a-b, args, 0))
+    vm.push(reduce(lambda a, b: a-b, args))
 
 def mul(vm):
     size = vm.argstarts.pop()
@@ -43,7 +43,7 @@ def mul(vm):
             raise Exception("`*/n`: invalid argument type")
         args.append(el)
 
-    vm.stack.append(reduce(lambda a, b: a*b, args, 1))
+    vm.push(reduce(lambda a, b: a*b, args))
 
 def div(vm):
     size = vm.argstarts.pop()
@@ -54,7 +54,7 @@ def div(vm):
             raise Exception("`//n`: invalid argument type")
         args.append(el)
 
-    vm.stack.append(reduce(lambda a, b: a/b, args, 1))
+    vm.push(reduce(lambda a, b: a/b, args))
 
 def list(vm):
     size = vm.argstarts.pop()
@@ -64,34 +64,34 @@ def list(vm):
         args.append(el)
 
     args.reverse() # :/
-    vm.stack.append(reduce(lambda a, b: Cons(b, a), args, None))
+    vm.push(reduce(lambda a, b: Cons(b, a), args, None))
 
 def eqq(vm):
     a = vm.stack.pop()
     b = vm.stack.pop()
-    vm.stack.append(a == b)
+    vm.push(a == b)
 
 def atomq(vm):
     el = vm.stack.pop()
-    vm.stack.append(type(el) is int or type(el) is str)
+    vm.push(type(el) is int or type(el) is str)
 
 def nilq(vm):
     el = vm.stack.pop()
-    vm.stack.append(el is None)
+    vm.push(el is None)
 
 def cons(vm):
     a = vm.stack.pop()
     b = vm.stack.pop()
-    vm.stack.append(Cons(a, b))
+    vm.push(Cons(a, b))
 
 def car(vm):
     el = vm.stack.pop()
     if not type(el) is Cons:
         raise Exception("Invalid type for internal function `car`")
-    vm.stack.append(el.car)
+    vm.push(el.car)
 
 def cdr(vm):
     el = vm.stack.pop()
     if not type(el) is Cons:
         raise Exception("Invalid type for internal function `cdr`")
-    vm.stack.append(el.cdr)
+    vm.push(el.cdr)
