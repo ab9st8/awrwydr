@@ -1,5 +1,6 @@
 from cons import *
 from ops import *
+from lambdaobj import *
 
 # As mentioned in the readme and the name of this project suggests, the process
 # of taking some cons- (or Polish notation) code and turning it into RPN-compliant
@@ -98,12 +99,12 @@ class Parser:
                 return [OP_UP_DIS] + self.parse(expr.cdr.car) + [OP_DOWN_DIS]
 
             # `(cond (COND1 EXPR1) (COND2 EXPR2) ...)`
-            # Takes a list of pairs of expressions as arguments and evaluates them
+            # Takes a variable number of pairs of expressions as arguments and evaluates them
             # in order. If [COND] evaluates to true, [EXPR] is evaluated and returned.
             # If [COND] evaluates to false, the next pair is evaluated.
             elif fn == 'cond':
                 result = []
-                for pair in expr.cdr.car:
+                for pair in expr.cdr:
                     if not type(pair) is Cons or len(pair) != 2:
                         raise Exception("cond: invalid syntax")
                     cond = pair.car
@@ -124,33 +125,68 @@ class Parser:
                     result[patch] = len(result) - patch + 1
                 return result
 
-            # Default case, simply a function call.
+            # `(lambda (param1 param2 ...) EXPR)`
+            # Takes a list of identifiers [param1 param2 ...] and an expression [EXPR]
+            # as arguments and returns a lambda object that takes [param1 param2 ...] as
+            # arguments and evaluates [EXPR] with them bound.
+            elif fn in ['lambda', 'λ']:
+                if len(expr) == 3:
+                    ids = expr.cdr.car
+                    if not type(ids) is Cons:
+                        raise Exception("lambda/2: invalid syntax")
+                    params = []
+                    for param in ids:
+                        if not type(param) is str:
+                            raise Exception("lambda/2: invalid syntax")
+                        params.append(param)
+                    
+                    expr = self.parse(expr.cdr.cdr.car)
+                    return [OP_LAMBDA, params, expr]
+                elif len(expr) == 2:
+                    expr = self.parse(expr.cdr.car)
+                    return [OP_LAMBDA, [], expr]
+                else:
+                    raise Exception("lambda/1-2: invalid number of arguments")
+                
+            # A lambda call.
+            elif self.parse(fn)[0] == OP_LAMBDA:
+                result = []
+                if type(expr.cdr) is Cons:
+                    for el in reversed(expr.cdr):
+                        result += self.parse(el)
+                return result + self.parse(fn) + [OP_EVAL]
+
+            # In-built function call.
             elif fn in self.fns:
                 result = []
                 # if the function is variadic, we need to mark the start of arguments
                 if self.fns[fn] == -1:
                     result = [OP_START_ARGS]
                 elif len(expr) - 1 != self.fns[fn]: # <list length> - <fn name>
-                    if self.fns[fn] == -1:
-                        arity = 'n'
-                    else:
-                        arity = str(self.fns[fn])
-                    raise Exception(f"{fn}/{arity}: invalid number of arguments")
+                    raise Exception(f"{fn}/{self.fns[fn]}: invalid number of arguments")
 
                 # This is the highly anticipated "turning of the hourglass"! First we
                 # add parsed arguments to our result, and only after that do we add the
-                # function name and call opcode.
-                if type(expr.cdr) is Cons:
-                    for el in reversed(expr.cdr):
-                        result += self.parse(el)
+                # call opcode with the function name.
+                for el in reversed(expr.cdr):
+                    result += self.parse(el)
+            
                 # TODO: what about this?
                 # else:
                 #     result += self.parse(expr.cdr)
 
                 result += [OP_CALL, fn]
                 return result
+
+            elif type(fn) is str:
+                result = []
+                if type(expr.cdr) is Cons:
+                    for el in reversed(expr.cdr):
+                        result += self.parse(el)
+                return result + [OP_FIND, fn, OP_EVAL]
+
             else:
-                raise Exception(f"unknown function `{fn}`")
+                raise Exception(f"invalid car: {fn}")
         else:
             # We solemnly pledge to resolve all identifiers and leave them not
             # in literal form!

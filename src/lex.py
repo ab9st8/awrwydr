@@ -8,26 +8,31 @@ class Lexer:
     def lex(self, code):
         self.__init__() # just for good measure
         self.code = code
-        result = self.expr()
-        if self.cursor != len(code):
-            raise Exception("trailing expressions past a single s-expression")
-        return result
+        start = self.advance()
+        if start != '(':
+            return start
+        return self.expr(start)
 
-    def expr(self):
-        lexeme = self.advance()
+    def expr(self, lexeme):
+        if self.isAtEnd(): raise Exception("unexpected end of input")
+
         if lexeme == '(':
-            result = cons.Cons(self.expr(), None)
-            while self.curr() != ')':
-                result.append(self.expr())
+            result = cons.Cons(None, None)
+            while True:
+                lexeme = self.advance()
+                if lexeme == ')': break
+                result.append(self.expr(lexeme))
+
                 if self.isAtEnd(): raise Exception("unterminated s-expression")
-            self.cursor += 1
+
+            # self.cursor += 1
             return result
 
         elif lexeme == ')':
             raise Exception("unexpected closing paren `)`")
 
         else:
-            return lexeme # return lexeme parsed into atomic Python literal
+            return lexeme
 
     def curr(self):
         """Returns the character currently being inspected."""

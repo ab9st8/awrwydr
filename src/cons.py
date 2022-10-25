@@ -4,7 +4,6 @@ class Cons:
         self.cdr = cdr
 
     def __repr__(self):
-        # return f"({' '.join([str(el) for el in self])})"
         result = '('
         obj = self
         while True:
@@ -32,7 +31,6 @@ class Cons:
         return reversed(list(self.__iter__()))
 
     # Append a value to the end of the linked list.
-    # TODO: this should probably be rewritten
     def append(self, value):
         if self.car is None and value is not None:
             self.car = value
@@ -43,10 +41,6 @@ class Cons:
         else:
             self.cdr.append(value)
 
-    # Recursive in true functional fashion!
     def __len__(self):
-        if self.cdr is None:
-            return 1
-        else:
-            return 1 + len(self.cdr)
+        return len(list(self.__iter__()))
     

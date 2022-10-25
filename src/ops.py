@@ -1,3 +1,7 @@
+from lambdaobj import *
+from copy import deepcopy
+import vm as vmmod
+
 # This is the module where everything regarding how to execute our stack-based code lies.
 # We begin with definitions of the integer representations of each primitive VM opcode;
 # the ones that interact with it and its stack on a very basic level. These are NOT built-in
@@ -15,6 +19,8 @@ OP_UP_DIS = 5
 OP_DOWN_DIS = 6
 OP_JUMP = 7
 OP_JIF = 8
+OP_LAMBDA = 9
+OP_EVAL = 10
 
 # Documentation syntax:
 #
@@ -24,7 +30,7 @@ OP_JIF = 8
 # OP_ATOM/1
 # Pushes an atomic value (first positional argument) onto the stack.
 def opAtom(vm):
-    vm.stack.append(vm.pcval(1))
+    vm.push(vm.pcval(1))
     return 2
 
 # OP_CALL/1
@@ -43,9 +49,9 @@ def opDefine(vm):
 # Finds a symbol (first positional argument) in the symbol table and pushes it onto the stack.
 def opFind(vm):
     name = vm.pcval(1)
-    if not name in vm.defs:
+    if name not in vm.defs:
         raise Exception(f"symbol \"{name}\" not defined")
-    vm.stack.append(vm.defs[name])
+    vm.push(vm.defs[name])
     return 2
 
 # OP_START_ARGS/0
@@ -73,8 +79,30 @@ def opJif(vm):
         return vm.pcval(1)
     return 2
 
+# OP_LAMBDA/2
+# Creates a lambda object from the first positional argument (a list of parameter names) and the
+# second positional argument (a list of VM microcode).
+def opLambda(vm):
+    vm.push(Lambda(vm.pcval(1), vm.pcval(2)))
+    return 3
 
-# These are the disassembly versions of each of the VM's opcodes. They will be executed
+# OP_EVAL/0 (1)
+# Evaluates a lambda object (first stack-wise argument).
+def opEval(vm):
+    fn = vm.stack.pop()
+    defs = deepcopy(vm.defs)
+    for name in fn.params:
+        defs[name] = vm.stack.pop()
+    temp = vmmod.VM(defs)
+    temp.run(fn.code)
+    if len(temp.stack) == 0:
+        vm.push(None)
+    else:
+        vm.push(temp.stack.pop())
+    return 1
+
+
+# These are the disassembled versions of each of the VM's opcodes. They will be executed
 # instead of their default counterparts above when up into disassembly mode with `OP_UP_DIS`.
 
 def disAtom(vm):
@@ -123,5 +151,13 @@ def disDownDis(vm):
         print(f"{vm.pc:03} -- OP_DOWN_DIS")
     return 1
 
-OPTABLE = [opAtom, opCall, opDefine, opFind, opStartArgs, opUpDis, disDownDis, opJump, opJif]
-DISOPTABLE = [disAtom, disCall, disDefine, disFind, disStartArgs, disUpDis, disDownDis, disJump, disJif]
+def disLambda(vm):
+    print(f"{vm.pc:03} -- OP_LAMBDA {vm.pcval(1)} {vm.pcval(2)}")
+    return 3
+
+def disEval(vm):
+    print(f"{vm.pc:03} -- OP_EVAL")
+    return 1
+
+OPTABLE = [opAtom, opCall, opDefine, opFind, opStartArgs, opUpDis, disDownDis, opJump, opJif, opLambda, opEval]
+DISOPTABLE = [disAtom, disCall, disDefine, disFind, disStartArgs, disUpDis, disDownDis, disJump, disJif, disLambda, disEval]
