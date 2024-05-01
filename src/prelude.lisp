@@ -1,5 +1,5 @@
-;; These are some useful definitions that are parsed and loaded by the interpreter
-;; before the REPL prompt comes up. 
+% These are some useful definitions that are parsed and loaded by the interpreter
+% before the REPL prompt comes up. 
 
 
 (define caar (λ (val)
@@ -17,13 +17,13 @@
 (define cons? (λ (val)
     (not? (or? (atom? val) (nil? val)))))
 
-;; Defined in the Paper, p.12
+% Defined in the Paper, p.12
 (define ff (λ (val)
     (cond
         ((atom? val) val)
         (true (ff (car val))))))
 
-;; Defined in the Paper, p.14
+% Defined in the Paper, p.14
 (define among (λ (list el)
     (cond
         ((cons? list) (or? (among (car list) el) (among (cdr list) el)))
