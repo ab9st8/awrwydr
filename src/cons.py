@@ -28,10 +28,10 @@ class Cons:
             yield self.cdr
 
     def __reversed__(self):
-        return reversed(list(self.__iter__()))
+        return reversed(list(self.__iter__())) # lazy but works for our purposes
 
-    # Append a value to the end of the linked list.
     def append(self, value):
+        """Appends a value to the end of the linked list."""
         if self.car is None and value is not None:
             self.car = value
         elif type(self.cdr) is not Cons:

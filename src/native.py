@@ -67,9 +67,15 @@ def list(vm):
     vm.push(reduce(lambda a, b: Cons(b, a), args, None))
 
 def eqq(vm):
+    def eq(a, b):
+        if type(a) is Cons and type(b) is Cons:
+            return eq(a.car, b.car) and eq(a.cdr, b.cdr)
+        return a == b
+
     a = vm.stack.pop()
     b = vm.stack.pop()
-    vm.push(a == b)
+    
+    vm.push(eq(a, b))
 
 def atomq(vm):
     el = vm.stack.pop()

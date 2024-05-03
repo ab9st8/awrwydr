@@ -3,9 +3,9 @@ import native
 from lambdaobj import *
 
 
-# Our stack-based VM! It operates on only five opcodes, all defined
-# in ops.py. Other than that it relies on native functions (native.py)
-# for all of its internal behavior.
+# Our stack-based VM! All of its opcodes are defined in `ops.py`
+# Other than that it relies on native functions (native.py) for
+# all of its internal behavior.
 
 class VM:
     def __init__(self, defs={}):

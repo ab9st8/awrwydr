@@ -58,13 +58,19 @@ class Parser:
 
         # when 0, everything is executed as expected.
         # when >0, instead every instruction is disassembled.
-        # OP_UPDIS increments this, OP_DOWNDIS 
+        # OP_UPDIS increments this, OP_DOWNDIS decrements — this
+        # allows for nested `dis` expressions
         self.disstate = 0
-
         self.jumppatches = []
-        # self.jifpatches = []
 
-    def parse(self, expr):
+    def parse(self, lex):
+        res = []
+
+        for expr in lex:
+            res += self._parse(expr)
+        return res
+
+    def _parse(self, expr):
         if type(expr) is Cons:
             fn = expr.car
 
@@ -86,44 +92,47 @@ class Parser:
                 name = expr.cdr.car
                 if not type(name) is str:
                     raise Exception("define/2: invalid symbol")
-                value = self.parse(expr.cdr.cdr.car)
+                value = self._parse(expr.cdr.cdr.car)
                 return value + [OP_DEFINE, name]
 
             # `(dis EXPR)`
             # Takes an expression [EXPR] as an argument and, without evaluating it,
-            # prints its disassembled microcode form to stdout.
+            # prints out its disassembled microcode form.
             elif fn == 'dis':
                 if len(expr) != 2:
                     raise Exception("dis/1: invalid number of arguments")
 
-                return [OP_UP_DIS] + self.parse(expr.cdr.car) + [OP_DOWN_DIS]
+                return [OP_UP_DIS] + self._parse(expr.cdr.car) + [OP_DOWN_DIS]
 
             # `(cond (COND1 EXPR1) (COND2 EXPR2) ...)`
             # Takes a variable number of pairs of expressions as arguments and evaluates them
             # in order. If [COND] evaluates to true, [EXPR] is evaluated and returned.
             # If [COND] evaluates to false, the next pair is evaluated.
             elif fn == 'cond':
-                result = []
+                code = []
                 for pair in expr.cdr:
                     if not type(pair) is Cons or len(pair) != 2:
                         raise Exception("cond: invalid syntax")
                     cond = pair.car
                     expr = pair.cdr.car
+                    print(f"(cond) pair :: cond={cond}, expr={expr}")
                     
                     # The boolean condition and jump-if-false
-                    result += self.parse(cond) + [OP_JIF, 0]
-                    jifpatch = len(result) - 1 # save the patch location
+                    code += self._parse(cond) + [OP_JIF, 0]
+                    jifpatch = len(code) - 1 # save the patch location
 
                     # The evaluated expression and unconditional jump
-                    result += self.parse(expr) + [OP_JUMP, 0]
-                    self.jumppatches.append(len(result) - 1) # save the patch location
+                    code += self._parse(expr) + [OP_JUMP, 0]
+                    self.jumppatches.append(len(code) - 1) # save the patch location
 
                     # patch JIF
-                    result[jifpatch] = len(result) - jifpatch + 1
+                    code[jifpatch] = len(code) - jifpatch + 1
 
                 for patch in self.jumppatches:
-                    result[patch] = len(result) - patch + 1
-                return result
+                    code[patch] = len(code) - patch + 1
+                
+                self.jumppatches = []
+                return code
 
             # `(lambda (param1 param2 ...) EXPR)`
             # Takes a list of identifiers [param1 param2 ...] and an expression [EXPR]
@@ -140,60 +149,58 @@ class Parser:
                             raise Exception("lambda/2: invalid syntax")
                         params.append(param)
                     
-                    expr = self.parse(expr.cdr.cdr.car)
+                    expr = self._parse(expr.cdr.cdr.car)
                     return [OP_LAMBDA, params, expr]
                 elif len(expr) == 2:
-                    expr = self.parse(expr.cdr.car)
+                    expr = self._parse(expr.cdr.car)
                     return [OP_LAMBDA, [], expr]
                 else:
                     raise Exception("lambda/1-2: invalid number of arguments")
                 
-            # A lambda call.
-            elif self.parse(fn)[0] == OP_LAMBDA:
-                result = []
+            # An immediate lambda call.
+            elif self._parse(fn)[0] == OP_LAMBDA:
+                code = []
                 if type(expr.cdr) is Cons:
                     for el in reversed(expr.cdr):
-                        result += self.parse(el)
-                return result + self.parse(fn) + [OP_EVAL]
+                        code += self._parse(el)
+                return code + self._parse(fn) + [OP_EVAL]
 
             # In-built function call.
-            elif fn in self.fns:
-                result = []
+            elif fn in self.fns.keys():
+                code = []
                 # if the function is variadic, we need to mark the start of arguments
                 if self.fns[fn] == -1:
-                    result = [OP_START_ARGS]
+                    code = [OP_START_ARGS]
                 elif len(expr) - 1 != self.fns[fn]: # <list length> - <fn name>
                     raise Exception(f"{fn}/{self.fns[fn]}: invalid number of arguments")
 
                 # This is the highly anticipated "turning of the hourglass"! First we
-                # add parsed arguments to our result, and only after that do we add the
+                # add parsed arguments to our code, and only after that do we add the
                 # call opcode with the function name.
-                for el in reversed(expr.cdr):
-                    result += self.parse(el)
-            
-                # TODO: what about this?
-                # else:
-                #     result += self.parse(expr.cdr)
+                for el in reversed(list(expr.cdr)):
+                    arg = self._parse(el)
+                    code += arg
 
-                result += [OP_CALL, fn]
-                return result
+                code += [OP_CALL, fn]
+                return code
 
             elif type(fn) is str:
-                result = []
+                code = []
                 if type(expr.cdr) is Cons:
                     for el in reversed(expr.cdr):
-                        result += self.parse(el)
-                return result + [OP_FIND, fn, OP_EVAL]
+                        code += self._parse(el)
+                return code + [OP_FIND, fn, OP_EVAL]
 
             else:
                 raise Exception(f"invalid car: {fn}")
+
         else:
             # We solemnly pledge to resolve all identifiers and leave them not
-            # in literal form!
+            # in literal form! (use `quote` for that)
             if type(expr) is str:
                 return [OP_FIND, expr]
             return [OP_ATOM, expr]
-
+    
     def quote(self, expr):
         """Quote an expression into RPN-compliant code."""
         if type(expr) is Cons:
@@ -203,7 +210,7 @@ class Parser:
             if expr.car == 'unquote':
                 if len(expr) != 2:
                     raise Exception("unquote/1: invalid number of arguments")
-                return self.parse(expr.cdr.car)
+                return self._parse(expr.cdr.car)
             return self.quote(expr.cdr) + self.quote(expr.car) + [OP_CALL, 'cons']
         else:
             return [OP_ATOM, expr]

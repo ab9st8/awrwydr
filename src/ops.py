@@ -103,7 +103,7 @@ def opEval(vm):
 
 
 # These are the disassembled versions of each of the VM's opcodes. They will be executed
-# instead of their default counterparts above when up into disassembly mode with `OP_UP_DIS`.
+# instead of their default counterparts above when in disassembly mode.
 
 def disAtom(vm):
     print(f"{vm.pc:03} -- OP_ATOM   {str(vm.pcval(1))}")
