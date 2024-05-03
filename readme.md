@@ -59,14 +59,14 @@ At that point you should... simply follow the instruction, really. You can view 
 - `cond/n`, which takes an arbitrary number `n` of `(COND EXPR)` pairs as arguments, where `COND` is an expression that evaluates to a boolean value and `EXPR` is an expression. The interpreter will evaluate the `EXPR` of the first pair whose `COND` evaluates to true,
 - `lambda/2`, which takes one list of identifiers and one s-expression as arguments and creates a lambda abstraction (anonymous function) using the identifiers from the first argument as its parameters and the s-expression as the function body.[^5]
 
-Enter `end`, `(end)`, or an empty line to exit the REPL gracefully.
+Enter `end`, `(end)` or ctrl-D to exit the REPL gracefully.
 
 All errors are reported within Python's exception system — perhaps when all other important features are implemented I'll look to making a more competent error system.
 
 ## Questions
 ### What's src/prelude.lisp?
 It serves both as a test and a way to import some basic functionality that doesn't have to be defined natively. (However at the current moment it is still not available inside of the interpreter; this is being worked on.)
-### What does the project's name mean? How do you pronounce it?
+### What does the project name mean? How do you pronounce it?
 It's pronounced something close to "hour-wedder" in English and it means "hourglass" in Welsh. I chose it to reflect the manner of PN-to-RPN translation used in this parser (reversal, like the turning of an hourglass).
 ### Why choose Python as the implementation language?
 Python trades performance for ease and speed of development — in the case of a toy interpreter, I value the latter deeply and don't really care about the prior.
