@@ -31,15 +31,13 @@ vm     = VM()
 try:
     with open(PRELUDE_PATH, "r") as f:
         vm.run(parser.parse(lexer.lex(f.read())))
-    print(SUCCESS_PROMPT + Style.DIM + "<`prelude.lisp` loaded!>" + Style.RESET_ALL)
+    print(SUCCESS_PROMPT + Style.DIM + "<`prelude.lisp` loaded!>")
 except Exception as e:
-    msg = Style.DIM + "<run with `-v` or `--verbose` to see exception>" + Style.RESET_ALL
+    msg = Style.DIM + "<run with `-v` or `--verbose` to see error>"
     if args.verbose:
-        msg = Style.DIM + f"<exception: {e.args[0]}>" + Style.RESET_ALL
-    print(ERROR_PROMPT + Style.DIM + "<`prelude.lisp` faulty or not found>" + Style.RESET_ALL)
+        msg = Style.DIM + f"<error: {e.args[0]}>"
+    print(ERROR_PROMPT + Style.DIM + "<`prelude.lisp` faulty or not found>")
     print(ERROR_PROMPT + msg)
-
-print(vm.defs)
 
 # REPL loop
 while True:
@@ -56,7 +54,7 @@ while True:
     try:
         vm.run(parser.parse(lexer.lex(code)))
     except Exception as e:
-        print(ERROR_PROMPT + f"<exception: {e.args[0]}>")
+        print(ERROR_PROMPT + Style.DIM + f"<error: {e.args[0]}>")
     
     if vm.size() > 0:
         print(SUCCESS_PROMPT + str(vm.stack.pop()))

@@ -15,7 +15,7 @@ class Lexer:
             expr = self.expr(self.advance())
             if expr is not None:
                 res.append(expr)
-        print(res)
+
         return res
 
     def expr(self, lexeme):
@@ -67,7 +67,6 @@ class Lexer:
 
         # skip comments, starting at '%' and ending at nearest newline
         if self.curr() == '%':
-            # print("HANDLING A COMMENT")
             return '%' # we only begin ignoring comments inside `Lexer.expr()`
 
         # '('
@@ -99,7 +98,6 @@ class Lexer:
             if lexeme == "true": return True
             elif lexeme == "false": return False
             elif lexeme == "nil": return None
-            # print(f"returning lexeme {lexeme}")
             return lexeme
 
         # nothing matched so we should probably report an error

@@ -115,7 +115,6 @@ class Parser:
                         raise Exception("cond: invalid syntax")
                     cond = pair.car
                     expr = pair.cdr.car
-                    print(f"(cond) pair :: cond={cond}, expr={expr}")
                     
                     # The boolean condition and jump-if-false
                     code += self._parse(cond) + [OP_JIF, 0]
